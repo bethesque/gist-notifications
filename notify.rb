@@ -4,19 +4,14 @@ require 'net/https'
 require 'json'
 require 'date'
 require 'erb'
-
-username = ARGV[0] || 'bethesque'
-last_run_time_string = ARGV[1] || "2014-09-04T08:31:46Z"
-last_run_time_file_location = "/tmp/gist-notifications-last-run-time"
-#last_run_time_string = "2013-09-04T08:31:46Z"
+require 'net/smtp'
 
 class RunDetails
 
   attr_reader :username
 
-  def initialize username, last_run_time_file_location
+  def initializelast_run_time_file_location
     @this_run_time = DateTime.now
-    @username = username
     @last_run_time_file_location = last_run_time_file_location
   end
 
@@ -50,7 +45,6 @@ class GistRepository
   private
 
   def make_request url
-    puts url
     uri = URI(url)
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
@@ -112,6 +106,10 @@ class Gist
     @comments = comments
   end
 
+  def html_url
+    @attributes['html_url']
+  end
+
   def to_json options = {}
     to_hash.to_json options
   end
@@ -130,7 +128,6 @@ class Gist
 
   def comments_created_or_updated_since datetime
     comments.select do | comment |
-      # puts "checking #{DateTime.parse(comment["updated_at"])} >= #{datetime} #{DateTime.parse(comment["updated_at"]) >= datetime}"
       DateTime.parse(comment["updated_at"]) >= datetime
     end
   end
@@ -141,20 +138,53 @@ class Gist
 
 end
 
-run_details = RunDetails.new(username, last_run_time_file_location)
-gists = GistRepository.new.gists_with_comments_updated_since(run_details.username, run_details.last_run_time)
+class NotificationEmail
+
+  attr_reader :recipient, :sender, :sender_password, :smtp_server
+
+  def initialize recipient, sender, sender_password, smtp_server
+    @recipient = recipient
+    @sender = sender
+    @sender_password = sender_password
+    @smtp_server = smtp_server
+  end
+
+  def send msg
+    msg = "Subject: New comments on gists\n\n#{msg}"
+    smtp = Net::SMTP.new smtp_server, 587
+    smtp.enable_starttls
+
+    smtp.start(sender.split("@").last, sender, sender_password, :login) do
+      smtp.send_message(msg, sender, recipient)
+    end
+  end
+
+end
+
+username = ARGV[0]
+recipient = ARGV[1]
+sender = ARGV[2]
+sender_password = ARGV[3]
+smtp_server = ARGV[4] || 'smtp.gmail.com'
+last_run_time_file_location = ARGV[5] || "/tmp/gist-notifications-last-run-time"
+
+run_details = RunDetails.new(last_run_time_file_location)
+gists = GistRepository.new.gists_with_comments_updated_since(username, run_details.last_run_time)
 run_details.update_last_run_time
 puts "#{gists.size} updated since #{run_details.last_run_time}"
-renderer = ERB.new(DATA.read)
-puts renderer.result(binding())
-
+if gists.any?
+  renderer = ERB.new(DATA.read)
+  notification_body = renderer.result(binding())
+  puts notification_body
+  NotificationEmail.new(recipient, sender, sender_password, smtp_server).send notification_body
+end
 
 __END__
 <% gists.each do | gist | %>
   <%= gist.description %>
+  <%= gist.html_url %>
     <% gist.comments_created_or_updated_since(run_details.last_run_time).each do | comment | %>
       <%= comment['user']['login'] %> said:
       <%= comment['body'] %>
-      <%= comment['url'] %>
     <% end %>
 <% end %>
