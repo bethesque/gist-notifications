@@ -137,19 +137,48 @@ class Gist
 
 end
 
+class NotificationBody
+
+  attr_reader :gists, :last_run_time
+
+  def initialize gists, last_run_time
+    @gists = gists
+    @last_run_time = last_run_time
+  end
+
+  def render
+    ERB.new(template).result(binding())
+  end
+
+  def template
+<<-eos
+<% gists.each do | gist | %>
+  <%= gist.description %>
+  <%= gist.html_url %>
+    <% gist.comments_created_or_updated_since(last_run_time).each do | comment | %>
+      <%= comment['user']['login'] %> said:
+      <%= comment['body'] %>
+    <% end %>
+<% end %>
+eos
+  end
+
+end
+
 class NotificationEmail
 
-  attr_reader :recipient, :sender, :sender_password, :smtp_server
+  attr_reader :recipient, :sender, :sender_password, :smtp_server, :body
 
-  def initialize recipient, sender, sender_password, smtp_server
+  def initialize recipient, sender, sender_password, smtp_server, body
     @recipient = recipient
     @sender = sender
     @sender_password = sender_password
     @smtp_server = smtp_server
+    @body = body
   end
 
-  def send msg
-    msg = "Subject: New comments on gists\n\n#{msg}"
+  def send
+    msg = "From: \"Gist Notifications\" <#{sender}>\nSubject: New comments on gists\n\n#{body}"
     smtp = Net::SMTP.new smtp_server, 587
     smtp.enable_starttls
 
@@ -169,21 +198,11 @@ last_run_time_file_location = ARGV[5] || "/tmp/gist-notifications-last-run-time"
 
 run_details = RunDetails.new(last_run_time_file_location)
 gists = GistRepository.new.gists_with_comments_updated_since(username, run_details.last_run_time)
-run_details.update_last_run_time
+
 puts "#{gists.size} updated since #{run_details.last_run_time}"
 if gists.any?
-  renderer = ERB.new(DATA.read)
-  notification_body = renderer.result(binding())
-  puts notification_body
-  NotificationEmail.new(recipient, sender, sender_password, smtp_server).send notification_body
+  notification_body = NotificationBody.new(gists, run_details.last_run_time).render.tap{ | body | puts body }
+  NotificationEmail.new(recipient, sender, sender_password, smtp_server, notification_body).send
 end
 
-__END__
-<% gists.each do | gist | %>
-  <%= gist.description %>
-  <%= gist.html_url %>
-    <% gist.comments_created_or_updated_since(run_details.last_run_time).each do | comment | %>
-      <%= comment['user']['login'] %> said:
-      <%= comment['body'] %>
-    <% end %>
-<% end %>
+run_details.update_last_run_time
