@@ -11,6 +11,7 @@
       <string>EMAIL_RECIPIENT</string>
       <string>EMAIL_SENDER</string>
       <string>EMAIL_PASSWORD</string>
+      <string>GITHUB_AUTH_TOKEN</string>
     </array>
     <key>StartInterval</key>
     <integer>3600</integer>

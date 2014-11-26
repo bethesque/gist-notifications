@@ -10,9 +10,13 @@ With some defaults:
 
     $ ./notify_of_new_gist_comments github_username recipient_email sender_email email_password
 
+This will notify for public gists only, will use `smtp.gmail.com` to send your emails, and use the file `/tmp/gist-notifications-last-run-time` to store the last run time in.
+
+To see comments on private gists that you have shared with others, you will need to create a Github OAuth token with the `gist` scope [here](https://github.com/settings/applications#personal-access-tokens), and pass the token in after the email_password.
+
 With all args:
 
-    $ ./notify_of_new_gist_comments github_username recipient_email sender_email email_password smtp.gmail.com /tmp/gist-notifications-last-run-time
+    $ ./notify_of_new_gist_comments github_username recipient_email sender_email email_password github_auth_token smtp.gmail.com /tmp/gist-notifications-last-run-time
 
 
 ## Installing Launchd

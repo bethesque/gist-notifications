@@ -36,6 +36,10 @@ end
 
 class GistRepository
 
+  def initialize authorization_token
+    @authorization_header = authorization_token ? "token #{authorization_token}" : nil
+  end
+
   def gists_with_comments_updated_since username, last_run_time
     get_gists_with_comments(username)
       .select{ | gist | gist.any_comments_created_or_updated_since? last_run_time }
@@ -43,13 +47,14 @@ class GistRepository
 
   private
 
-  def make_request url
+  def make_request url, options = {}
     uri = URI(url)
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     request = Net::HTTP::Get.new(uri.request_uri)
-    request['Accept'] = 'application/vnd.github.v3+json'
+    request['Accept'] = options.fetch('Accept', 'application/vnd.github.v3+json')
+    request['Authorization'] = @authorization_header if @authorization_header
     response = http.request(request)
     if response.code == '200'
       JSON.parse(response.body)
@@ -65,7 +70,6 @@ class GistRepository
 
   def add_comments gists
     gists.select(&:has_comments?).collect do | gist |
-      sleep 3
       gist.comments = get_comments(gist)
       gist
     end
@@ -75,9 +79,8 @@ class GistRepository
     add_comments(get_gists_for_user(username))
   end
 
-
   def get_comments gist
-    make_request gist.comments_url
+    make_request gist.comments_url, 'Accept' => 'application/vnd.github.VERSION.text+json'
   end
 end
 
@@ -157,7 +160,7 @@ class NotificationBody
   <%= gist.html_url %>
     <% gist.comments_created_or_updated_since(last_run_time).each do | comment | %>
       <%= comment['user']['login'] %> said:
-      <%= comment['body'] %>
+      <%= comment['body_text'] %>
     <% end %>
 <% end %>
 eos
@@ -193,11 +196,12 @@ username = ARGV[0]
 recipient = ARGV[1]
 sender = ARGV[2]
 sender_password = ARGV[3]
-smtp_server = ARGV[4] || 'smtp.gmail.com'
+authorization_token = ARGV[4]
+smtp_server = ARGV[5] || 'smtp.gmail.com'
 last_run_time_file_location = ARGV[5] || "/tmp/gist-notifications-last-run-time"
 
 run_details = RunDetails.new(last_run_time_file_location)
-gists = GistRepository.new.gists_with_comments_updated_since(username, run_details.last_run_time)
+gists = GistRepository.new(authorization_token).gists_with_comments_updated_since(username, run_details.last_run_time)
 
 puts "#{gists.size} updated since #{run_details.last_run_time}"
 if gists.any?
