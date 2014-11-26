@@ -1,14 +1,18 @@
 # Gist Notifications
 
+Send emails when new comments are made on your gists.
+
+This script uses a file to keep track of the last run time.
+
 ## Usage
 
 With some defaults:
 
-    $ ruby notify.rb github_username recipient_email sender_email email_password
+    $ ./notify_of_new_gist_comments github_username recipient_email sender_email email_password
 
 With all args:
 
-    $ ruby notify.rb github_username recipient_email sender_email email_password smtp.gmail.com /tmp/gist-notifications-last-run-time
+    $ ./notify_of_new_gist_comments github_username recipient_email sender_email email_password smtp.gmail.com /tmp/gist-notifications-last-run-time
 
 
 ## Installing Launchd
