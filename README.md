@@ -21,7 +21,9 @@ With all args:
     $ ./notify_of_new_gist_comments github_username recipient_email sender_email email_password github_auth_token smtp.gmail.com /tmp/gist-notifications-last-run-time
 
 
-## Installing Launchd
+## Installing with Launchd configuration
+
+Update `com.bethesque.gist-notifications.plist` with appropriate values, and run the following:
 
 ```shell
 cp notify_of_new_gist_comments /usr/local/bin/notify_of_new_gist_comments
@@ -29,10 +31,18 @@ chmod +x /usr/local/bin/notify_of_new_gist_comments
 sudo mkdir /var/log/gist-notifications
 sudo chown $USER:staff /var/log/gist-notifications
 cp com.bethesque.gist-notifications.plist $HOME/Library/LaunchAgents/com.bethesque.gist-notifications.plist
-launchctl unload $HOME/Library/LaunchAgents/com.bethesque.gist-notifications.plist ; \
+launchctl load $HOME/Library/LaunchAgents/com.bethesque.gist-notifications.plist
+launchctl start com.bethesque.gist-notifications
+```
+
+To update the launchd config:
+
+```shell
+launchctl unload $HOME/Library/LaunchAgents/com.bethesque.gist-notifications.plist && \
 launchctl load $HOME/Library/LaunchAgents/com.bethesque.gist-notifications.plist && \
 launchctl start com.bethesque.gist-notifications
 ```
+
 
 ## Troubleshooting
 
