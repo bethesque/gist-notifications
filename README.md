@@ -36,7 +36,7 @@ launchctl start com.bethesque.gist-notifications
 
 ## Troubleshooting
 
-If you get a Net::SMTPAuthenticationError, try going to `https://accounts.google.com/b/0/DisplayUnlockCaptcha`, submitting, and then running the code again.
+If you get a `Net::SMTPAuthenticationError`, try going to `https://accounts.google.com/b/0/DisplayUnlockCaptcha`, submitting, and then running the code again.
 
 
 For launchd issues, try:
