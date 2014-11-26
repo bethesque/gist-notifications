@@ -2,7 +2,9 @@
 
 Send emails when new comments are made on your gists.
 
-This script uses a file to keep track of the last run time.
+This is useful because Github [does not currently send any notifications](https://github.com/isaacs/github/issues/21).
+
+This script uses a file to keep track of the last run time, and has been designed to run alone without any extra gems.
 
 ## Usage
 
