@@ -44,4 +44,5 @@ For launchd issues, try:
     $ tail -f /var/log/system.log
 
 Or
+
     $ tail -f /var/log/gist-notifications/launchd.out
