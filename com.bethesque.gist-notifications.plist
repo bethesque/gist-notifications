@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.bethesque.gist-notifications</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/usr/local/bin/notify_of_new_gist_comments</string>
+      <string>GITHUB_USERNAME</string>
+      <string>EMAIL_RECIPIENT</string>
+      <string>EMAIL_SENDER</string>
+      <string>EMAIL_PASSWORD</string>
+    </array>
+    <key>StartInterval</key>
+    <integer>3600</integer>
+    <key>Debug</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/var/log/gist-notifications/launchd.out</string>
+    <key>StandardErrorPath</key>
+    <string>/var/log/gist-notifications/launchd.out</string>
+</dict>
+</plist>
