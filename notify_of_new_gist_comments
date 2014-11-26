@@ -181,7 +181,7 @@ class NotificationEmail
   end
 
   def send
-    msg = "From: \"Gist Notifications\" <#{sender}>\nSubject: New comments on gists\n\n#{body}"
+    msg = "From: \"Gist Notifications\" <#{sender}>\nTo: #{recipient}\nSubject: New comments on gists\n\n#{body}"
     smtp = Net::SMTP.new smtp_server, 587
     smtp.enable_starttls
 
