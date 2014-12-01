@@ -18,7 +18,7 @@ To see comments on private gists that you have shared with others, you will need
 
 With all args:
 
-    $ ./notify_of_new_gist_comments github_username recipient_email sender_email email_password github_auth_token smtp.gmail.com /tmp/gist-notifications-last-run-time
+    $ ./notify_of_new_gist_comments github_username recipient_email sender_email email_password github_auth_token smtp.gmail.com last_run_time_file_location
 
 
 ## Installing with Launchd configuration
