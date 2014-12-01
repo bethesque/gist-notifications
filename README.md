@@ -12,7 +12,7 @@ With some defaults:
 
     $ ./notify_of_new_gist_comments github_username recipient_email sender_email email_password
 
-This will notify for public gists only, will use `smtp.gmail.com` to send your emails, and use the file `/tmp/gist-notifications-last-run-time` to store the last run time in.
+This will notify for public gists only, will use `smtp.gmail.com` to send your emails, and use the file `/tmp/gist-notifications-last-run-time` to store the last run time in. It's a good idea to create a separate email account for sending emails, so you're not leaving your personal email password lying around in clear text.
 
 To see comments on private gists that you have shared with others, you will need to create a Github OAuth token with the `gist` scope [here](https://github.com/settings/applications#personal-access-tokens), and pass the token in after the email_password.
 
